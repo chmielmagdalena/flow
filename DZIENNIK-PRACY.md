@@ -65,3 +65,4 @@ W Make moduł 5 („Search Rows” po adresie i niepustej treści) odznaczał **
   API po podpięciu nowego wyglądu. Naprawa: zapisywane są tylko pola, które przyszły.
   Wniosek: przy zmianie interfejsu sprawdzać serwer pod kątem tego, CO nowy interfejs wysyła.
 - Podczas testów AI zabiło własne polecenie (`pkill -f` pasowało do linii polecenia powłoki) — bez skutków.
+- **Dopchnięcie do już scalonego PR.** Magdalena scaliła PR #1 o 22:16, a AI dołożyło drugi commit (wygląd FLOW) do tej samej gałęzi później, bez sprawdzenia stanu PR, i napisało „scal oba PR”. W efekcie główna wersja miała stary panel. Wykryte, gdy Magdalena poprosiła o sprawdzenie GitHuba. Naprawa: osobny PR #2 z brakującym commitem. Wniosek: przed dopisaniem do gałęzi sprawdzić, czy jej PR nie jest już scalony.
