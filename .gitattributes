@@ -1,0 +1,2 @@
+# Plik .bat musi mieć windowsowe końce linii — nie zmieniać ich
+*.bat -text

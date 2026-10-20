@@ -1,0 +1,41 @@
+{
+  "id": "B",
+  "nazwa": "B – kwoty do zapłaty",
+  "opis": "Codziennie wieczorem: klienci z zatwierdzoną treścią maila dostają zestawienie kwot (PIT/CIT, ZUS, PIT-4, VAT, PPK). Po wysyłce arkusz jest odznaczany.",
+  "wlaczony": false,
+  "harmonogram": { "godzina": "18:00" },
+  "kroki": [
+    {
+      "typ": "arkusz.czytaj",
+      "arkusz": "1HOCJN4MDjA6Yx63Z77lzotGBawIXl4u7ZCk1l_RrFO4",
+      "zakladka": "Klienci"
+    },
+    {
+      "typ": "filtr",
+      "warunki": [
+        { "pole": "Treść maila", "op": "niepuste" },
+        { "pole": "Zatwierdzone", "op": "rowne", "wartosc": "tak" }
+      ]
+    },
+    { "typ": "grupuj", "pole": "Email" },
+    {
+      "typ": "mail.wyslij",
+      "do": "{{klucz}}",
+      "etykieta": "Nazwa firmy",
+      "temat": "Kwoty do zapłaty za {{Za miesiąc}}",
+      "tresc": "Dzień dobry,<br><br>poniżej kwoty do zapłaty:<br><br>{{#wiersze}}<b>{{Nazwa firmy}}</b><br>{{{Treść maila}}}<br>{{/wiersze}}W razie pytań proszę o odpowiedź na tę wiadomość.<br><br>{{{podpis}}}"
+    },
+    {
+      "typ": "arkusz.zapisz",
+      "pola": {
+        "Wysłano": "{{Za miesiąc}}",
+        "Zatwierdzone": "nie",
+        "Wysłano PIT/CIT": "{{(pomocnicza) po wysyłce PIT/CIT}}",
+        "Wysłano ZUS": "{{(pomocnicza) po wysyłce ZUS}}",
+        "Wysłano PIT-4": "{{(pomocnicza) po wysyłce PIT-4}}",
+        "Wysłano VAT": "{{(pomocnicza) po wysyłce VAT}}",
+        "Wysłano PPK": "{{(pomocnicza) po wysyłce PPK}}"
+      }
+    }
+  ]
+}

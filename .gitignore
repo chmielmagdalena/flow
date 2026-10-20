@@ -1,0 +1,3 @@
+node_modules/
+# Twoje dane: hasła, klucz Google, historia wysyłek. NIGDY nie trafiają do GitHuba.
+dane/
