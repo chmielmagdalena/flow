@@ -40,15 +40,30 @@ src/
   wykonawca.js    łączy silnik z magazynem i zapisuje historię
   magazyn.js      pliki JSON w %USERPROFILE%\Automatyzator-dane
   serwer.js       panel + API, tylko 127.0.0.1:3030
-panel/            panel w przeglądarce (bez frameworka); docelowo wygląd z Lovable
+panel/            ZBUDOWANY panel FLOW (React, wygląd z Lovable) — nie edytować ręcznie, patrz niżej
 scenariusze-domyslne/  A.json, B.json — kopiowane do danych przy pierwszym uruchomieniu
 test/test.js      testy na zmyślonych danych: npm test
 ```
 
 Scenariusz to plik JSON z listą kroków — ten sam format będzie zapisywał edytor bloczków (etap 2).
 
+## Panel (wygląd)
+
+Wygląd powstaje w Lovable, w repozytorium **`tax-polonica-automatyzator`**. W Lovable działa
+na danych przykładowych; tu — na prawdziwym programie. Po zmianach w Lovable:
+
+```
+# w repozytorium tax-polonica-automatyzator
+npm run build:panel          # → folder dist-panel
+# zawartość dist-panel skopiować do flow/panel (zastąpić całość)
+```
+
+Edytor bloczków zapisuje scenariusz przez `PUT /api/scenariusze/:id`. Serwer sprawdza go
+(`sprawdzKroki` w `silnik.js`) i odrzuca z polskim komunikatem, jeśli np. „Zapisz w arkuszu”
+stoi przed „Wyślij mail”.
+
 ## Etapy
 
 1. ✅ Silnik, scenariusze A i B, panel, tryby, historia — **na komputerze**
-2. ⬜ Wygląd z Lovable + edytor bloczków (przeciąganie)
+2. ✅ Wygląd FLOW z Lovable + edytor bloczków na płótnie (przeciąganie, panel ustawień)
 3. ⬜ Przeniesienie na serwer w chmurze (wtedy działa przy wyłączonym komputerze)

@@ -33,5 +33,9 @@ Każdą sesję dopisuj do `DZIENNIK-PRACY.md`: czynności po kolei, udane i nieu
 aplikacje z AI” i pracy doktorskiej.
 
 ## Stan
-Etap 1 gotowy w kodzie i testach (`npm test`), **nieuruchomiony jeszcze na jej komputerze**.
-Następnie: wygląd z Lovable (osobny projekt, prompt w dzienniku z 20.10), edytor bloczków.
+Etap 1 i wygląd FLOW z edytorem płótna gotowe w kodzie i testach (`npm test`),
+**nieuruchomione jeszcze na jej komputerze**.
+
+⚠️ `panel/` jest **zbudowany** z repozytorium `tax-polonica-automatyzator` (Lovable,
+`npm run build:panel`). Nie edytuj go ręcznie — zmiany zrób tam i przebuduj.
+Lovable ma swoją nazwę „FLOW” i limonkowy akcent — to decyzja Magdaleny, nie zmieniaj.

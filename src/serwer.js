@@ -8,7 +8,7 @@ import { wykonaj } from './wykonawca.js';
 import { startHarmonogramu } from './harmonogram.js';
 import { polaczenieGoogle } from './arkusz.js';
 import { polaczeniePoczty } from './poczta.js';
-import { OPISY_KROKOW } from './silnik.js';
+import { OPISY_KROKOW, sprawdzKroki } from './silnik.js';
 import { godzinaTeraz } from './czas.js';
 
 const PORT = Number(process.env.PORT) || 3030;
@@ -37,8 +37,13 @@ app.get('/api/stan', obsluz(() => ({
 
 // ---------- scenariusze ----------
 app.get('/api/scenariusze', obsluz(() => {
+  // Ostatnie uruchomienie = najnowszy wpis w historii (z godziną); gdy brak — dzień z harmonogramu.
   const st = magazyn.stan();
-  return magazyn.scenariusze().map((s) => ({ ...s, ostatnieUruchomienie: st.ostatnieUruchomienie[s.id] || null }));
+  const hist = magazyn.historia(500);
+  return magazyn.scenariusze().map((s) => ({
+    ...s,
+    ostatnieUruchomienie: hist.find((h) => h.scenariusz === s.id)?.start || st.ostatnieUruchomienie[s.id] || null
+  }));
 }));
 
 app.put('/api/scenariusze/:id', obsluz((req) => {
@@ -51,7 +56,11 @@ app.put('/api/scenariusze/:id', obsluz((req) => {
     if (!/^([01]\d|2[0-3]):[0-5]\d$/.test(godzina)) throw new Error('Godzina w formacie GG:MM, np. 08:00');
     nowy.harmonogram = { ...nowy.harmonogram, godzina };
   }
-  if (Array.isArray(kroki)) nowy.kroki = kroki;
+  if (kroki !== undefined) {
+    const bledy = sprawdzKroki(kroki);
+    if (bledy.length) throw new Error('Nie zapisano. ' + bledy.join(' '));
+    nowy.kroki = kroki;
+  }
   magazyn.zapiszScenariusz(nowy);
   return nowy;
 }));

@@ -64,8 +64,10 @@ export function ustawienia() {
   return { ...DOMYSLNE_USTAWIENIA, ...u, smtp: { ...DOMYSLNE_USTAWIENIA.smtp, ...(u.smtp || {}) } };
 }
 export function zapiszUstawienia(nowe) {
+  // Zmieniamy tylko to, co przyszło — brakujące pola zostają bez zmian.
+  const tylkoPodane = (o) => Object.fromEntries(Object.entries(o || {}).filter(([, v]) => v !== undefined));
   const obecne = ustawienia();
-  const wynik = { ...obecne, ...nowe, smtp: { ...obecne.smtp, ...(nowe.smtp || {}) } };
+  const wynik = { ...obecne, ...tylkoPodane(nowe), smtp: { ...obecne.smtp, ...tylkoPodane(nowe.smtp) } };
   if (!['test', 'na_zywo'].includes(wynik.tryb)) wynik.tryb = 'test';
   wynik.smtp.port = Number(wynik.smtp.port) || 587;
   wynik.maksMailiNaPrzebieg = Number(wynik.maksMailiNaPrzebieg) || 60;

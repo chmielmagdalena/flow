@@ -51,6 +51,54 @@ function spelnia(pola, warunek, teraz) {
   }
 }
 
+/**
+ * Sprawdza scenariusz zapisany z edytora, ZANIM trafi na dysk.
+ * Zwraca listę problemów po polsku (pusta = w porządku).
+ */
+export function sprawdzKroki(kroki) {
+  const bledy = [];
+  if (!Array.isArray(kroki) || !kroki.length) return ['Scenariusz nie ma żadnego bloczka.'];
+  const OPS = ['rowne', 'rozne', 'zawiera', 'niepuste', 'puste'];
+  const pusty = (t) => typeof t !== 'string' || !t.trim();
+  let bylaWysylka = false;
+  kroki.forEach((k, i) => {
+    const nr = `Bloczek ${i + 1} (${OPISY_KROKOW[k?.typ] || k?.typ || '?'})`;
+    if (!k || typeof k !== 'object') { bledy.push(`Bloczek ${i + 1} jest uszkodzony.`); return; }
+    if (KROKI_ZBIORCZE.has(k.typ) && bylaWysylka) bledy.push(`${nr}: musi stać przed „Wyślij mail”.`);
+    switch (k.typ) {
+      case 'arkusz.czytaj':
+        if (i !== 0) bledy.push(`${nr}: „Odczytaj arkusz” musi być pierwszym bloczkiem.`);
+        if (pusty(k.arkusz)) bledy.push(`${nr}: brak ID arkusza.`);
+        if (pusty(k.zakladka)) bledy.push(`${nr}: brak nazwy zakładki.`);
+        break;
+      case 'filtr':
+        if (!Array.isArray(k.warunki) || !k.warunki.length) bledy.push(`${nr}: brak warunków.`);
+        else k.warunki.forEach((w, j) => {
+          if (pusty(w?.pole)) bledy.push(`${nr}, warunek ${j + 1}: wpisz nazwę kolumny.`);
+          if (!OPS.includes(w?.op)) bledy.push(`${nr}, warunek ${j + 1}: nieznany warunek.`);
+        });
+        break;
+      case 'grupuj':
+        if (pusty(k.pole)) bledy.push(`${nr}: wpisz kolumnę, po której grupować.`);
+        break;
+      case 'mail.wyslij':
+        bylaWysylka = true;
+        if (pusty(k.do)) bledy.push(`${nr}: brak adresata (np. {{Email}}).`);
+        if (pusty(k.temat)) bledy.push(`${nr}: brak tematu.`);
+        if (pusty(k.tresc)) bledy.push(`${nr}: brak treści.`);
+        break;
+      case 'arkusz.zapisz':
+        if (!bylaWysylka) bledy.push(`${nr}: „Zapisz w arkuszu” musi stać za „Wyślij mail” — odznaczamy tylko to, co poszło.`);
+        if (!k.pola || typeof k.pola !== 'object' || !Object.keys(k.pola).length) bledy.push(`${nr}: brak kolumn do zapisania.`);
+        break;
+      default:
+        bledy.push(`${nr}: nieznany rodzaj bloczka.`);
+    }
+  });
+  if (kroki[0]?.typ !== 'arkusz.czytaj') bledy.unshift('Pierwszym bloczkiem po harmonogramie musi być „Odczytaj arkusz”.');
+  return [...new Set(bledy)];
+}
+
 /** Zbiera wszystkie nazwy kolumn, których scenariusz używa — żeby sprawdzić je ZANIM cokolwiek wyślemy. */
 function uzywaneKolumny(kroki) {
   const nazwy = new Set();
