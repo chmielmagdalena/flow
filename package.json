@@ -1,0 +1,20 @@
+{
+  "name": "automatyzator",
+  "version": "0.1.0",
+  "description": "Własny automatyzator dla biura rachunkowego — scenariusze jak w Make, uruchamiane na własnym komputerze",
+  "type": "module",
+  "main": "src/serwer.js",
+  "private": true,
+  "scripts": {
+    "start": "node src/serwer.js",
+    "test": "node test/test.js"
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "dependencies": {
+    "express": "^4.22.3",
+    "google-auth-library": "^11.3.1",
+    "nodemailer": "^10.1.7"
+  }
+}

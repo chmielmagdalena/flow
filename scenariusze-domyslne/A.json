@@ -1,0 +1,28 @@
+{
+  "id": "A",
+  "nazwa": "A – termin zatwierdzenia w Betterfly",
+  "opis": "Codziennie rano: klienci z Betterfly, którym za 2 dni mija termin zatwierdzenia dokumentów, dostają przypomnienie.",
+  "wlaczony": false,
+  "harmonogram": { "godzina": "08:00" },
+  "kroki": [
+    {
+      "typ": "arkusz.czytaj",
+      "arkusz": "1HOCJN4MDjA6Yx63Z77lzotGBawIXl4u7ZCk1l_RrFO4",
+      "zakladka": "Klienci"
+    },
+    {
+      "typ": "filtr",
+      "warunki": [
+        { "pole": "Comarch Betterfly", "op": "rowne", "wartosc": "tak" },
+        { "pole": "termin zatwierdzenia dokumentow", "op": "rowne", "wartosc": "{{dzien(+2)}}" }
+      ]
+    },
+    {
+      "typ": "mail.wyslij",
+      "do": "{{Email}}",
+      "etykieta": "Nazwa firmy",
+      "temat": "Termin zatwierdzenia dokumentów w Betterfly",
+      "tresc": "Dzień dobry,<br><br>przypominam, że zgodnie z umową w dniu {{data(+2)}} mija termin zatwierdzenia dokumentów w Comarch Betterfly ({{Nazwa firmy}}).<br><br>Jeśli dokumenty są już zatwierdzone — proszę zignorować tę wiadomość.<br>W razie pytań proszę o odpowiedź na tę wiadomość.<br><br>{{{podpis}}}"
+    }
+  ]
+}
