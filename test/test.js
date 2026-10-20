@@ -2,7 +2,7 @@
 // Uruchom: npm test
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
-import { uruchom } from '../src/silnik.js';
+import { uruchom, sprawdzKroki } from '../src/silnik.js';
 import { wypelnij, htmlNaTekst } from '../src/szablon.js';
 import { literaKolumny } from '../src/arkusz.js';
 import { dataZaDni, formatujDate } from '../src/czas.js';
@@ -162,6 +162,21 @@ await test('zmieniony nagłówek w arkuszu → nic nie wysłane, jasny komunikat
   assert.equal(r.status, 'blad');
   assert.match(r.komunikat, /"Zatwierdzone"/);
   assert.equal(z.wyslane.length, 0);
+});
+
+console.log('Sprawdzanie scenariuszy z edytora');
+await test('scenariusze A i B są poprawne', () => {
+  assert.deepEqual(sprawdzKroki(A.kroki), []);
+  assert.deepEqual(sprawdzKroki(B.kroki), []);
+});
+await test('zapis w arkuszu przed wysyłką jest odrzucany', () => {
+  const zle = [B.kroki[0], B.kroki[4], B.kroki[3]];
+  assert.ok(sprawdzKroki(zle).some((b) => b.includes('musi stać za „Wyślij mail”')));
+});
+await test('pusty filtr i nieznany bloczek są odrzucane', () => {
+  const b = sprawdzKroki([A.kroki[0], { typ: 'filtr', warunki: [{ pole: '', op: 'rowne' }] }, { typ: 'cos' }]);
+  assert.ok(b.some((x) => x.includes('nazwę kolumny')));
+  assert.ok(b.some((x) => x.includes('nieznany rodzaj')));
 });
 
 console.log(`\nZaliczone: ${zaliczone}`);
