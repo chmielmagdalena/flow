@@ -66,3 +66,42 @@ W Make moduł 5 („Search Rows” po adresie i niepustej treści) odznaczał **
   Wniosek: przy zmianie interfejsu sprawdzać serwer pod kątem tego, CO nowy interfejs wysyła.
 - Podczas testów AI zabiło własne polecenie (`pkill -f` pasowało do linii polecenia powłoki) — bez skutków.
 - **Dopchnięcie do już scalonego PR.** Magdalena scaliła PR #1 o 22:16, a AI dołożyło drugi commit (wygląd FLOW) do tej samej gałęzi później, bez sprawdzenia stanu PR, i napisało „scal oba PR”. W efekcie główna wersja miała stary panel. Wykryte, gdy Magdalena poprosiła o sprawdzenie GitHuba. Naprawa: osobny PR #2 z brakującym commitem. Wniosek: przed dopisaniem do gałęzi sprawdzić, czy jej PR nie jest już scalony.
+
+## 21 października 2026 — pierwsze uruchomienie na komputerze Magdaleny
+
+### Co się stało
+1. Praca przeniesiona do aplikacji Claude Code na komputerze Magdaleny (sesja BiuroPanelu). Repozytorium `flow`
+   sklonowane do `C:UsersDellDesktoplow`; testy 16/16; serwer wstał, panel FLOW otworzył się bez błędów.
+2. Skrót **FLOW** na Pulpicie → `URUCHOM.bat`. Magdalena: „skrót działa, panel się otworzył”.
+3. Krok 3 instrukcji (klucz Google): Google odmówiło utworzenia klucza — zasada organizacji
+   `iam.disableServiceAccountKeyCreation`. Magdalena: „to jest moje prywatne konto”. Przyczyna: projekt powstał
+   wewnątrz organizacji (Google „secure by default” od 2024 r.), nie konto. Rozwiązanie: nowy projekt z lokalizacją
+   „Brak organizacji” — zadziałało, klucz utworzony i wklejony.
+4. „Sprawdź połączenie” → „Google nie wpuszcza do arkusza (błąd 403)”. Program kazał udostępnić arkusz — ale 403
+   znaczy u Google także „nie włączono Sheets API w projekcie”, a w nowym projekcie punkt 3 trzeba zrobić od nowa.
+   Program mówił więc tylko o jednej z dwóch możliwych przyczyn.
+
+### Zmiany w kodzie
+- `src/arkusz.js`: nowa funkcja `opiszBladGoogle` — rozróżnia: wyłączone Sheets API (z numerem projektu z komunikatu
+  Google), nieudostępniony arkusz (403), zły identyfikator arkusza (404), odrzucony klucz (401 / invalid_grant).
+  Każdy komunikat mówi, co zrobić i wskazuje punkt instrukcji.
+- `test/test.js`: test pięciu rodzajów błędów na zmyślonych odpowiedziach Google (17/17).
+- `INSTRUKCJA.md`: opis blokady kluczy w organizacji i obejście; tabela „Co zrobić, gdy…” z nowymi komunikatami.
+
+### Nieudane po drodze
+- AI chciało samo zajrzeć do konsoli Google (sprawdzić, w jakiej organizacji jest projekt) — zarówno przez Chrome,
+  jak i przez wbudowaną przeglądarkę aplikacja odmówiła (tryb automatyczny nie wpuszcza na strony z ustawieniami
+  bezpieczeństwa konta). Magdalena sprawdziła sama.
+
+### Własne pomyłki AI
+- **Założenie, że blokada bierze się z konta firmowego.** Komunikat mówił „w Twojej organizacji”, AI od razu uznało,
+  że Magdalena jest zalogowana kontem Workspace, i kazało przelogować się na prywatny Gmail. A ona już była na
+  prywatnym. Przyczyna: organizacja jest cechą PROJEKTU, nie konta. Wniosek: przy komunikatach Google najpierw
+  ustalić, czego dotyczy zasada (projekt / konto / arkusz), zanim poda się „rozwiązanie”.
+- **Komunikat 403 z etapu 1 zgadywał jedną przyczynę.** Napisano go, zanim ktokolwiek zobaczył prawdziwy błąd 403.
+  Wniosek: komunikaty o błędach zewnętrznych usług pisać na podstawie prawdziwych odpowiedzi (treść `error.message`,
+  `details[].reason`), a nie samego numeru.
+
+### Do zrobienia
+- Magdalena: włączyć Google Sheets API w nowym projekcie ALBO udostępnić arkusz (po scaleniu PR panel sam powie, które).
+- Po scaleniu: `git pull` w `C:UsersDellDesktoplow` i ponowne uruchomienie skrótem FLOW.
