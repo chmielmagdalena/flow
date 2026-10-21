@@ -19,6 +19,34 @@ function zakres(zakladka, a1) {
   return `'${zakladka.replace(/'/g, "''")}'!${a1}`;
 }
 
+/**
+ * Tłumaczy błąd z Google na polski komunikat, który mówi, CO zrobić.
+ * Google zwraca ten sam numer 403 w dwóch różnych sytuacjach: gdy w projekcie
+ * nie włączono Google Sheets API i gdy arkusz nie jest udostępniony kontu technicznemu.
+ */
+export function opiszBladGoogle(e, kontoTechniczne) {
+  const status = e.response?.status;
+  const blad = e.response?.data?.error;
+  const tresc = String(blad?.message || e.message || '');
+  const powody = (blad?.details || []).map((d) => d.reason).filter(Boolean);
+  if (powody.includes('SERVICE_DISABLED') || /has not been used|is disabled/i.test(tresc)) {
+    const projekt = tresc.match(/project (\S+?)(?: before|\b)/)?.[1];
+    return `W projekcie Google${projekt ? ' „' + projekt + '”' : ''} nie jest włączone Google Sheets API. `
+      + 'Wejdź na console.cloud.google.com, wybierz ten projekt, wpisz w wyszukiwarce „Google Sheets API” i kliknij Włącz '
+      + '(krok 3, punkt 3 instrukcji). Potem odczekaj minutę i sprawdź połączenie ponownie.';
+  }
+  if (status === 403) {
+    return `Google nie wpuszcza do arkusza (błąd 403). Udostępnij arkusz kontu ${kontoTechniczne} jako Edytor (krok 3, punkt 9 instrukcji).`;
+  }
+  if (status === 404) {
+    return 'Google nie znajduje takiego arkusza (błąd 404). Sprawdź identyfikator arkusza w scenariuszu: to długi ciąg znaków z adresu arkusza, między /d/ a /edit.';
+  }
+  if (status === 401 || /invalid_grant|invalid_client|unauthorized_client/i.test(tresc)) {
+    return 'Google odrzuca klucz konta technicznego. Klucz mógł zostać usunięty w konsoli Google albo wklejono niepełny plik. Utwórz nowy klucz i wklej go w Połączeniach.';
+  }
+  return 'Błąd Google Sheets: ' + tresc;
+}
+
 export function polaczenieGoogle(kluczJson) {
   if (!kluczJson) throw new Error('Brak klucza Google. Wklej go w panelu: Połączenia → Google.');
   let klucz;
@@ -34,11 +62,7 @@ export function polaczenieGoogle(kluczJson) {
       const odp = await klient.request(opcje);
       return odp.data;
     } catch (e) {
-      const status = e.response?.status;
-      if (status === 403 || status === 404) {
-        throw new Error(`Google nie wpuszcza do arkusza (błąd ${status}). Udostępnij arkusz kontu ${klucz.client_email} jako Edytor.`);
-      }
-      throw new Error('Błąd Google Sheets: ' + (e.response?.data?.error?.message || e.message));
+      throw new Error(opiszBladGoogle(e, klucz.client_email));
     }
   }
 

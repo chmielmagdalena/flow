@@ -4,7 +4,7 @@ import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import { uruchom, sprawdzKroki } from '../src/silnik.js';
 import { wypelnij, htmlNaTekst } from '../src/szablon.js';
-import { literaKolumny } from '../src/arkusz.js';
+import { literaKolumny, opiszBladGoogle } from '../src/arkusz.js';
 import { dataZaDni, formatujDate } from '../src/czas.js';
 
 const A = JSON.parse(fs.readFileSync(new URL('../scenariusze-domyslne/A.json', import.meta.url)));
@@ -74,6 +74,20 @@ async function test(nazwa, fn) {
 console.log('Narzędzia');
 await test('litery kolumn', () => {
   assert.equal(literaKolumny(0), 'A'); assert.equal(literaKolumny(27), 'AB'); assert.equal(literaKolumny(59), 'BH');
+});
+await test('błędy Google: nie włączone API, nie udostępniony arkusz, zły identyfikator', () => {
+  const konto = 'flow@przyklad.iam.gserviceaccount.com';
+  const odp = (status, message, reason) => ({ response: { status, data: { error: { message, details: reason ? [{ reason }] : [] } } } });
+  const api = opiszBladGoogle(odp(403, 'Google Sheets API has not been used in project 512305 before or it is disabled. Enable it by visiting https://console.developers.google.com/', 'SERVICE_DISABLED'), konto);
+  assert.ok(api.includes('nie jest włączone Google Sheets API') && api.includes('512305'), api);
+  assert.ok(!api.includes('Udostępnij'), 'przy wyłączonym API nie każemy udostępniać arkusza');
+  const udost = opiszBladGoogle(odp(403, 'The caller does not have permission'), konto);
+  assert.ok(udost.includes('Udostępnij arkusz kontu ' + konto), udost);
+  const brak = opiszBladGoogle(odp(404, 'Requested entity was not found.'), konto);
+  assert.ok(brak.includes('nie znajduje takiego arkusza'), brak);
+  const klucz = opiszBladGoogle({ message: 'invalid_grant: Invalid JWT Signature.' }, konto);
+  assert.ok(klucz.includes('odrzuca klucz'), klucz);
+  assert.equal(opiszBladGoogle({ message: 'ECONNRESET' }, konto), 'Błąd Google Sheets: ECONNRESET');
 });
 await test('daty w strefie Warszawy, przez koniec miesiąca', () => {
   assert.equal(formatujDate(dataZaDni(2, new Date('2026-10-30T23:30:00Z'))), '02.11.2026'); // 31.10 00:30 w Warszawie (po zmianie czasu UTC+1)

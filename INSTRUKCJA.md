@@ -47,7 +47,14 @@ Program musi mieć własne „konto techniczne” Google, któremu udostępnisz 
 
 ⚠️ Plik `.json` to klucz do arkusza. Po wklejeniu do panelu **usuń go z Pobranych**, nie wysyłaj nikomu i nie wklejaj w czacie.
 
-Jeśli w kroku 6 Google pokaże komunikat, że tworzenie kluczy jest zablokowane przez zasady organizacji — zrób zrzut ekranu i pokaż go Claude.
+Jeśli w kroku 6 Google pokaże komunikat **„Tworzenie klucza konta usługi jest wyłączone”** (zasada
+`iam.disableServiceAccountKeyCreation`), to projekt powstał wewnątrz „organizacji” Google, a Google
+od 2024 r. blokuje w nich klucze z góry. Zdarza się to nawet na prywatnym koncie. Rozwiązanie:
+
+1. Kliknij u góry nazwę projektu → **Nowy projekt**.
+2. Nazwa dowolna (np. `flow-automatyzator`). W polu **Lokalizacja** kliknij **Przeglądaj** i wybierz **Brak organizacji**.
+3. W tym nowym projekcie wykonaj punkty 3–8 jeszcze raz. **Punkt 3 (włączenie Google Sheets API) trzeba zrobić
+   osobno w każdym projekcie** — inaczej panel pokaże „nie jest włączone Google Sheets API”.
 
 ## Krok 4. Poczta
 
@@ -84,7 +91,10 @@ Od teraz program sam wysyła o 08:00 (A) i 18:00 (B) — **pod warunkiem, że ko
 |---|---|
 | Panel się nie otwiera | Sprawdź, czy czarne okno jest otwarte. Jeśli nie — `URUCHOM.bat`. |
 | Czarne okno pokazuje błąd i się zatrzymuje | Zrób zrzut ekranu okna i pokaż Claude. |
-| „Google nie wpuszcza do arkusza” | Arkusz nie jest udostępniony kontu technicznemu (krok 3, punkt 9). |
+| „W projekcie Google … nie jest włączone Google Sheets API” | Klucz jest dobry, ale w tym projekcie nie włączono Sheets API (krok 3, punkt 3). Włącz i po minucie sprawdź ponownie. |
+| „Google nie wpuszcza do arkusza (błąd 403)” | Arkusz nie jest udostępniony kontu technicznemu (krok 3, punkt 9). Adres konta jest w komunikacie. |
+| „Google nie znajduje takiego arkusza (błąd 404)” | W scenariuszu jest zły identyfikator arkusza (ciąg znaków z adresu między `/d/` a `/edit`). |
+| „Google odrzuca klucz konta technicznego” | Klucz usunięty w konsoli Google albo wklejony niepełny plik. Utwórz nowy klucz. |
 | „W zakładce Klienci nie ma kolumn …” | Ktoś zmienił nagłówek w wierszu 1 arkusza. Przywróć dokładną nazwę. **Nic nie zostało wysłane.** |
 | „Mail wysłany, ale NIE udało się odznaczyć arkusza” | Wpisz ręcznie `nie` w kolumnie **Zatwierdzone** we wskazanych wierszach, zanim uruchomisz B ponownie. |
 | „Bezpiecznik…” | Przebieg wysłałby więcej maili niż limit. Sprawdź arkusz; jeśli wszystko jest dobrze — podnieś limit w Ustawieniach. |
